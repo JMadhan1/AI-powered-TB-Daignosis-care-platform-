@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulmoscan.ai - TB Diagnosis & Care</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #2b2d42;
+            --success: #4cc9f0;
+            --warning: #f77f00;
+            --danger: #e63946;
+            --gradient-1: linear-gradient(135deg, #4361ee, #3a0ca3);
+            --gradient-2: linear-gradient(135deg, #f72585, #b5179e);
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Enhanced Header */
+        header {
+            background: var(--gradient-1);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            background: rgba(67, 97, 238, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Enhanced Hero Section */
+        .hero {
+            background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), 
+                        url('https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?ixlib=rb-4.0.3') center/cover;
+            color: white;
+            text-align: center;
+            padding: 180px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            opacity: 0.85;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #fff, #f72585);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Enhanced Buttons */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-primary {
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(247, 37, 133, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(247, 37, 133, 0.3);
+        }
+
+        /* Enhanced Features Section */
+        .features {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .section-header.visible {
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background: var(--gradient-2);
+            border-radius: 2px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 0 20px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card.visible {
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotate(360deg);
+            color: var(--accent);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Floating Elements Animation */
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .btn-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 80%;
+                text-align: center;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Enhanced Feature Cards */
+        .feature-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .feature-details {
+            list-style: none;
+            margin-top: 1rem;
+            padding: 0;
+        }
+
+        .feature-details li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .feature-details li i {
+            color: var(--success);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-details li {
+            transform: translateX(5px);
+        }
+
+        .feature-card:hover .feature-details li i {
+            transform: scale(1.2);
+        }
+
+        /* Feature Highlights */
+        .feature-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(247, 37, 133, 0.1));
+            border-radius: var(--border-radius);
+        }
+
+        .highlight-card {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .highlight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .highlight-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .highlight-card:hover .highlight-icon {
+            transform: scale(1.1) rotate(360deg);
+            background: var(--gradient-2);
+        }
+
+        .highlight-content h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .highlight-content p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-highlights {
+                grid-template-columns: 1fr;
+            }
+
+            .highlight-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+        <nav>
+                <a href="/" class="logo">
+                    <i class="fas fa-lungs"></i>
+                    Pulmoscan.ai
+                </a>
+            <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/features">Features</a></li>
+                    <li><a href="/contact">Contact</a></li>
+            </ul>
+        </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="floating-elements">
+            <!-- Add floating elements dynamically with JavaScript -->
+        </div>
+        <div class="container">
+        <div class="hero-content">
+                <h1>Revolutionizing TB Diagnosis & Care</h1>
+                <p>Pulmoscan.ai combines advanced AI technology with medical expertise to provide accurate TB diagnosis, personalized treatment plans, and comprehensive patient care.</p>
+                <div class="btn-container">
+                    <a href="/login?type=patient" class="btn btn-primary">Patient Login</a>
+                    <a href="/login?type=healthcare" class="btn btn-secondary">Healthcare Worker Login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Advanced TB Detection & Analysis</h2>
+                <p>Comprehensive AI-powered solutions for accurate diagnosis and personalized care</p>
+            </div>
+            
+            <!-- Main Features Grid -->
+            <div class="feature-grid">
+                <!-- X-Ray Analysis -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <h3>AI-Powered X-Ray Analysis</h3>
+                    <p>Advanced CAD4TB integration for accurate TB detection with probability scoring and infected area highlighting.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Drag-and-drop X-ray upload</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time analysis with probability scoring</li>
+                        <li><i class="fas fa-check-circle"></i> Visual highlighting of infected areas</li>
+                    </ul>
+                </div>
+
+                <!-- Sputum Test Integration -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <h3>Sputum Test Integration</h3>
+                    <p>Comprehensive sputum test analysis with risk assessment tools for accurate diagnosis.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Manual test result entry</li>
+                        <li><i class="fas fa-check-circle"></i> Risk assessment questionnaire</li>
+                        <li><i class="fas fa-check-circle"></i> AI-powered result interpretation</li>
+                    </ul>
+                </div>
+
+                <!-- Treatment Guidance -->
+            <div class="feature-card">
+                    <div class="feature-icon">
+                <i class="fas fa-pills"></i>
+                    </div>
+                    <h3>Personalized Treatment</h3>
+                    <p>AI-driven treatment plans tailored to individual patient needs and drug resistance patterns.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Genomic-based treatment prediction</li>
+                        <li><i class="fas fa-check-circle"></i> Drug resistance pattern analysis</li>
+                        <li><i class="fas fa-check-circle"></i> Dosage optimization</li>
+                    </ul>
+                </div>
+
+                <!-- Education & Support -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Patient Education</h3>
+                    <p>Comprehensive educational resources and interactive learning modules.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Interactive learning modules</li>
+                        <li><i class="fas fa-check-circle"></i> Video tutorials</li>
+                        <li><i class="fas fa-check-circle"></i> Medication adherence guides</li>
+                    </ul>
+                </div>
+
+                <!-- Medication Tracking -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Medication Management</h3>
+                    <p>Smart medication tracking and adherence monitoring system.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Automated reminders</li>
+                        <li><i class="fas fa-check-circle"></i> Side effect monitoring</li>
+                        <li><i class="fas fa-check-circle"></i> Progress tracking</li>
+                    </ul>
+                </div>
+
+                <!-- Telemedicine -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Telemedicine Integration</h3>
+                    <p>Remote consultation and monitoring capabilities for comprehensive care.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Virtual consultations</li>
+                        <li><i class="fas fa-check-circle"></i> Remote monitoring</li>
+                        <li><i class="fas fa-check-circle"></i> Digital treatment logs</li>
+                    </ul>
+                </div>
+
+                <!-- Community Screening -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Community Screening</h3>
+                    <p>Advanced tools for community health workers to identify high-risk individuals.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Risk assessment tools</li>
+                        <li><i class="fas fa-check-circle"></i> Smartphone-based screening</li>
+                        <li><i class="fas fa-check-circle"></i> Community health analytics</li>
+                    </ul>
+                </div>
+
+                <!-- Offline Support -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-wifi-slash"></i>
+                    </div>
+                    <h3>Offline Functionality</h3>
+                    <p>Edge AI technology for uninterrupted service in remote areas.</p>
+                    <ul class="feature-details">
+                        <li><i class="fas fa-check-circle"></i> Offline data storage</li>
+                        <li><i class="fas fa-check-circle"></i> Local AI processing</li>
+                        <li><i class="fas fa-check-circle"></i> Automatic sync when online</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Feature Highlights Section -->
+            <div class="feature-highlights">
+                <div class="highlight-card">
+                    <div class="highlight-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="highlight-content">
+                        <h3>Advanced AI Analysis</h3>
+                        <p>State-of-the-art machine learning models for accurate TB detection and treatment prediction</p>
+                    </div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="highlight-content">
+                        <h3>Drug Resistance Detection</h3>
+                        <p>Early identification of drug-resistant TB strains for better treatment outcomes</p>
+                    </div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="highlight-content">
+                        <h3>Patient-Centric Care</h3>
+                        <p>Comprehensive support system for better treatment adherence and outcomes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+        <div class="footer-content">
+                <div class="footer-logo">Pulmoscan.ai</div>
+                <ul class="footer-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/features">Features</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+                <p class="copyright">&copy; 2025 Pulmoscan.ai. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Floating Elements Animation
+        function createFloatingElements() {
+            const container = document.querySelector('.floating-elements');
+            const elementCount = 20;
+
+            for (let i = 0; i < elementCount; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-element';
+                
+                // Random size between 10px and 30px
+                const size = Math.random() * 20 + 10;
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                
+                // Random position
+                element.style.left = `${Math.random() * 100}%`;
+                element.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation duration between 15s and 25s
+                element.style.animationDuration = `${Math.random() * 10 + 15}s`;
+                
+                // Random delay
+                element.style.animationDelay = `${Math.random() * 2}s`;
+                
+                container.appendChild(element);
+            }
+        }
+
+        // Scroll Animation for Header
+        function handleScroll() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Intersection Observer for Fade In Animations
+        function handleIntersection(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingElements();
+            
+            window.addEventListener('scroll', handleScroll);
+            
+            const observer = new IntersectionObserver(handleIntersection, {
+                threshold: 0.1
+            });
+            
+            document.querySelectorAll('.section-header, .feature-card').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Enhanced feature card animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const featureCards = document.querySelectorAll('.feature-card');
+            const highlightCards = document.querySelectorAll('.highlight-card');
+
+            // Intersection Observer for feature cards
+            const featureObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            featureCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                featureObserver.observe(card);
+            });
+
+            // Highlight cards animation
+            highlightCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateX(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html> 

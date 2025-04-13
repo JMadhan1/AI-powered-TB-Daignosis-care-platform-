@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - Pulmoscan.ai</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite@0.0.1-alpha.8"></script>
+    <style>
+        /* Modern Color Scheme */
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2b2d42;
+            --success-color: #4cc9f0;
+            --warning-color: #f77f00;
+            --danger-color: #e63946;
+            --gradient-1: linear-gradient(45deg, #4361ee, #3a0ca3);
+            --gradient-2: linear-gradient(45deg, #f72585, #b5179e);
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+        }
+
+        /* Enhanced Body Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-bg);
+            color: var(--dark-bg);
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, #f72585);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(247, 37, 133, 0.3);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(247, 37, 133, 0.6);
+            }
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f72585, #4361ee);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            border-radius: 12px;
+        }
+
+        .sidebar-menu a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a:hover::before {
+            opacity: 1;
+        }
+
+        .sidebar-menu a.active {
+            background: linear-gradient(45deg, #f72585, #4361ee);
+            color: white;
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+        }
+
+        .sidebar-menu i {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        /* Special styling for Upload Reports button */
+        .sidebar-menu a[href="#upload"] {
+            background: linear-gradient(45deg, #4361ee, #3a0ca3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu a[href="#upload"]:hover {
+            background: linear-gradient(45deg, #f72585, #4361ee);
+            border-color: transparent;
+            transform: translateX(5px) translateY(-2px);
+            box-shadow: 0 5px 15px rgba(247, 37, 133, 0.3);
+        }
+
+        .sidebar-menu a[href="#upload"].active {
+            background: linear-gradient(45deg, #f72585, #4361ee);
+            box-shadow: 0 5px 15px rgba(247, 37, 133, 0.3);
+        }
+
+        .sidebar-menu a[href="#upload"] i {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            margin-right: 12px;
+        }
+
+        .sidebar-menu a[href="#upload"]:hover i {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        /* Ripple effect for buttons */
+        .sidebar-menu a {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .sidebar-menu a:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        /* Active indicator */
+        .sidebar-menu a.active::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Enhanced Content Sections */
+        .content-section {
+            display: none !important;  /* Hide all sections by default */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block !important;  /* Show only active section */
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 280px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .section-header h2 {
+            color: var(--dark-bg);
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--gradient-1);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .nav-item span {
+                display: inline;
+            }
+        }
+
+        /* Enhanced Upload Section */
+        .upload-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .upload-option {
+            background: white;
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-option:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 20px rgba(247, 37, 133, 0.1);
+        }
+
+        .upload-option i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-option:hover i {
+            transform: scale(1.2) rotate(360deg);
+        }
+
+        .upload-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .upload-option:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Enhanced Analysis Section */
+        .analysis-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .xray-container {
+            position: relative;
+            margin: 20px auto;
+            max-width: 800px;
+            background: #000;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .infected-areas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .infected-area {
+            position: absolute;
+            border: 3px solid rgba(247, 37, 133, 0.8);
+            border-radius: 50%;
+            background: radial-gradient(circle at center, 
+                rgba(247, 37, 133, 0.3) 0%,
+                rgba(247, 37, 133, 0.1) 70%,
+                rgba(247, 37, 133, 0) 100%);
+            box-shadow: 0 0 15px rgba(247, 37, 133, 0.5),
+                       inset 0 0 15px rgba(247, 37, 133, 0.5);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .infected-area::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background-color: rgba(247, 37, 133, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(247, 37, 133, 0.8);
+        }
+
+        .infected-area::after {
+            content: attr(data-severity);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .infected-area:hover::after {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.5;
+                box-shadow: 0 0 25px rgba(247, 37, 133, 0.7),
+                           inset 0 0 25px rgba(247, 37, 133, 0.7);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        .xray-image-wrapper {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            background-color: #000;
+        }
+
+        .analysis-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: contrast(1.2) brightness(1.1);
+        }
+
+        .marker-label {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 11;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Enhanced Circular Progress */
+        .circular-progress {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            filter: drop-shadow(0 0 10px rgba(67, 97, 238, 0.3));
+        }
+
+        .circular-progress circle {
+            stroke-width: 12;
+            stroke-linecap: round;
+            transition: all 1s ease;
+        }
+
+        .circular-progress circle:first-child {
+            stroke: rgba(67, 97, 238, 0.1);
+        }
+
+        .circular-progress circle:last-child {
+            stroke: var(--primary-color);
+            stroke-dasharray: 565;
+            transform-origin: center;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Enhanced Buttons */
+        .btn {
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Loading Animation */
+        .analysis-loading {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .analysis-loading i {
+            font-size: 3rem;
+            color: var(--accent-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Enhanced Modal */
+        .modal-content {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 20px;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Add these styles to your existing CSS */
+        .analysis-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .xray-analysis-container {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .probability-indicator {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .graph-container {
+            height: 200px;
+            margin-bottom: 1.5rem;
+        }
+
+        .findings-list {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .findings-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .findings-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+        }
+
+        .findings-list li:last-child {
+            border-bottom: none;
+        }
+
+        .findings-list li::before {
+            content: '•';
+            color: #f72585;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        /* Sputum Analysis Styles */
+        .sputum-analysis-container {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .circular-progress {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 2rem auto;
+        }
+
+        .circular-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .circular-progress circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .progress-bg {
+            stroke: #f1f2f6;
+        }
+
+        .progress-bar {
+            stroke: #4361ee;
+            stroke-dasharray: 408;
+            stroke-dashoffset: 408;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-text span {
+            display: block;
+        }
+
+        #sputumProbability {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4361ee;
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sputum-results {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Pulmoscan.ai</h3>
+                <p>Welcome, {{ patient.name }}</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#upload" class="active">
+                        <i class="fas fa-upload"></i>
+                        Upload Reports
+                    </a>
+                </li>
+                <li>
+                    <a href="#analysis">
+                        <i class="fas fa-chart-bar"></i>
+                        Analysis
+                    </a>
+                </li>
+                <li>
+                    <a href="#medications">
+                        <i class="fas fa-pills"></i>
+                        Medications
+                    </a>
+                </li>
+                <li>
+                    <a href="#prevention">
+                        <i class="fas fa-shield-virus"></i>
+                        Prevention Steps
+                    </a>
+                </li>
+                <li>
+                    <a href="#guidance">
+                        <i class="fas fa-book-medical"></i>
+                        TB Guidance
+                    </a>
+                </li>
+                <li>
+                    <a href="/logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Upload Section -->
+            <div id="upload" class="content-section">
+                <div class="section-header">
+                    <h2>Upload Reports</h2>
+                </div>
+                <div class="upload-options">
+                    <div class="upload-option" id="xrayUpload">
+                        <i class="fas fa-x-ray"></i>
+                        <h4>Upload X-Ray</h4>
+                        <p>Click to upload chest X-ray image</p>
+                        <input type="file" accept="image/*" style="display: none;">
+                        <div class="upload-status" id="xrayStatus"></div>
+                    </div>
+                    <div class="upload-option" id="sputumUpload">
+                        <i class="fas fa-vial"></i>
+                        <h4>Sputum Test</h4>
+                        <p>Scan barcode or enter manually</p>
+                        <div class="upload-status" id="sputumStatus"></div>
+                    </div>
+                </div>
+
+                <!-- Sputum Test Form -->
+                <div class="symptoms-form" id="sputumForm">
+                    <h3>Sputum Test Details</h3>
+                    <div class="sputum-entry-options">
+                        <button type="button" class="btn btn-primary mb-3" id="scanBarcode">
+                            <i class="fas fa-barcode"></i> Scan Barcode
+                        </button>
+                        <p class="text-muted">or enter details manually</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="sputumId">Test ID</label>
+                        <input type="text" class="form-control" id="sputumId" name="sputum_id" placeholder="Enter test ID or scan barcode">
+                    </div>
+                    <div class="form-group">
+                        <label for="sputumResult">Test Result</label>
+                        <select class="form-control" id="sputumResult" name="sputum_result">
+                            <option value="">Select result</option>
+                            <option value="positive">Positive</option>
+                            <option value="negative">Negative</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sputumDate">Test Date</label>
+                        <input type="date" class="form-control" id="sputumDate" name="sputum_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="sputumNotes">Additional Notes</label>
+                        <textarea class="form-control" id="sputumNotes" name="sputum_notes" rows="3"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="closeSputumForm()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSputumData()">Save</button>
+                </div>
+
+                <!-- Symptoms Questionnaire -->
+                <div class="symptoms-form" id="symptomsQuestionnaire">
+                    <h3>Symptoms Questionnaire</h3>
+                    <p class="text-muted mb-3">Please answer these questions if you don't have X-ray or sputum test results</p>
+                    
+                    <div class="form-group">
+                        <label>Do you have a persistent cough that has lasted more than 2 weeks?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="cough" value="yes" id="coughYes">
+                            <label class="form-check-label" for="coughYes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="cough" value="no" id="coughNo">
+                            <label class="form-check-label" for="coughNo">No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Have you experienced chest pain?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chest_pain" value="yes" id="chestPainYes">
+                            <label class="form-check-label" for="chestPainYes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chest_pain" value="no" id="chestPainNo">
+                            <label class="form-check-label" for="chestPainNo">No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Have you had night sweats?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="night_sweats" value="yes" id="sweatsYes">
+                            <label class="form-check-label" for="sweatsYes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="night_sweats" value="no" id="sweatsNo">
+                            <label class="form-check-label" for="sweatsNo">No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Have you experienced unexplained weight loss?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weight_loss" value="yes" id="weightLossYes">
+                            <label class="form-check-label" for="weightLossYes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="weight_loss" value="no" id="weightLossNo">
+                            <label class="form-check-label" for="weightLossNo">No</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Do you have fever and fatigue?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="fever_fatigue" value="yes" id="feverYes">
+                            <label class="form-check-label" for="feverYes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="fever_fatigue" value="no" id="feverNo">
+                            <label class="form-check-label" for="feverNo">No</label>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="closeSymptoms()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSymptoms()">Save</button>
+                </div>
+
+                <div class="submit-section" style="display: none;">
+                    <button type="button" class="btn btn-primary btn-lg" id="submitReports" onclick="submitReports()">
+                        <i class="fas fa-paper-plane"></i> Submit Reports
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div id="analysis" class="content-section">
+                <div class="section-header">
+                    <h2>Analysis Results</h2>
+                </div>
+                
+                <div class="analysis-grid">
+                    <!-- X-Ray Analysis -->
+                    <div class="analysis-card">
+                        <h3>X-Ray Analysis</h3>
+                        <div class="xray-analysis-container">
+                            <div class="xray-image-wrapper">
+                                <img id="xrayImage" src="" alt="X-Ray" class="analysis-image">
+                                <div id="infectedAreas" class="infected-areas-overlay"></div>
+                                <div class="probability-indicator">
+                                    <span id="tbProbability">0</span>% TB Probability
+                                </div>
+                            </div>
+                            <div class="analysis-details">
+                                <div class="graph-container">
+                                    <canvas id="analysisGraph"></canvas>
+                                </div>
+                                <div class="findings-list">
+                                    <h4>Key Findings</h4>
+                                    <ul id="findingsList"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sputum Test Analysis -->
+                    <div class="analysis-card">
+                        <h3>Sputum Test Analysis</h3>
+                        <div class="sputum-analysis-container">
+                            <div class="circular-progress">
+                                <svg>
+                                    <circle cx="75" cy="75" r="65" class="progress-bg"/>
+                                    <circle cx="75" cy="75" r="65" class="progress-bar"/>
+                                </svg>
+                                <div class="progress-text">
+                                    <span id="sputumProbability">0</span>%
+                                    <span class="progress-label">Positive</span>
+                                </div>
+                            </div>
+                            <div id="sputumResults" class="sputum-results"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medications Section -->
+            <div id="medications" class="content-section">
+                <div class="section-header">
+                    <h2>Current Medications</h2>
+                </div>
+                <div class="medication-list">
+                    <div class="medication-card">
+                        <h4>Isoniazid</h4>
+                        <p>Dosage: 300mg daily</p>
+                        <p>Duration: 6 months</p>
+                        <p>Next dose in: 2 hours</p>
+                    </div>
+                    <div class="medication-card">
+                        <h4>Rifampin</h4>
+                        <p>Dosage: 600mg daily</p>
+                        <p>Duration: 6 months</p>
+                        <p>Next dose in: 2 hours</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prevention Steps -->
+            <div id="prevention" class="content-section">
+                <div class="section-header">
+                    <h2>Prevention Steps</h2>
+                </div>
+                <div class="prevention-steps">
+                    <div class="prevention-card">
+                        <i class="fas fa-head-side-mask"></i>
+                        <h4>Cover Your Mouth</h4>
+                        <p>Always cover when coughing or sneezing</p>
+                    </div>
+                    <div class="prevention-card">
+                        <i class="fas fa-wind"></i>
+                        <h4>Ventilate Rooms</h4>
+                        <p>Ensure good ventilation in all rooms</p>
+                    </div>
+                    <div class="prevention-card">
+                        <i class="fas fa-pills"></i>
+                        <h4>Complete Treatment</h4>
+                        <p>Take all medications as prescribed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guidance Section -->
+            <div id="guidance" class="content-section">
+                <div class="section-header">
+                    <h2>TB Guidance</h2>
+                </div>
+                <div class="language-selector">
+                    <select class="form-select" id="languageSelect">
+                        <option value="english">English</option>
+                        <option value="kannada">ಕನ್ನಡ</option>
+                        <option value="telugu">తెలుగు</option>
+                        <option value="tamil">தமிழ்</option>
+                    </select>
+                </div>
+                <div class="guidance-content">
+                    <h3>Understanding Tuberculosis</h3>
+                    <p>Tuberculosis (TB) is an infectious disease that usually affects the lungs...</p>
+                </div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/example" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <div class="scroll-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Add this modal for camera view after the submit-section div -->
+    <div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cameraModalLabel">Scan Barcode</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="camera-container">
+                        <video id="cameraView" autoplay playsinline style="width: 100%; max-height: 400px; object-fit: cover;"></video>
+                        <canvas id="cameraCanvas" style="display: none;"></canvas>
+                        <div class="scan-overlay">
+                            <div class="scan-region"></div>
+                            <div class="scan-status">Position barcode within the frame</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize file upload functionality
+            const xrayUpload = document.getElementById('xrayUpload');
+            const xrayInput = xrayUpload.querySelector('input[type="file"]');
+            
+            // Add click handler for the X-ray upload div
+            xrayUpload.addEventListener('click', function() {
+                xrayInput.click();
+            });
+            
+            // Add change handler for the file input
+            xrayInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    // Update status to show selected file
+                    const statusDiv = document.getElementById('xrayStatus');
+                    statusDiv.innerHTML = `Selected file: ${file.name}`;
+                    statusDiv.style.color = 'green';
+                    
+                    // Show the submit button
+                    document.querySelector('.submit-section').style.display = 'block';
+                    
+                    // Create preview if it's an image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('xrayImage');
+                        if (preview) {
+                            preview.src = e.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Prevent the file input's click event from bubbling
+            xrayInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Get all sections and sidebar links
+            const sections = document.querySelectorAll('.content-section');
+            const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+            
+            // Show only upload section initially
+            sections.forEach(section => section.classList.remove('active'));
+            document.getElementById('upload').classList.add('active');
+            
+            // Add click handlers to sidebar links
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        
+                        // Get target section id
+                        const targetId = this.getAttribute('href').substring(1);
+                        
+                        // Update active states
+                        sidebarLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Hide all sections
+                        sections.forEach(section => {
+                            section.classList.remove('active');
+                        });
+                        
+                        // Show target section
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            targetSection.classList.add('active');
+                        }
+                    }
+                });
+            });
+            
+            // Handle form submissions
+            const submitButton = document.getElementById('submitReports');
+            if (submitButton) {
+                submitButton.addEventListener('click', function() {
+                    // After successful submission
+                    submitReports().then(() => {
+                        // Switch to analysis section
+                        sections.forEach(section => section.classList.remove('active'));
+                        document.getElementById('analysis').classList.add('active');
+                        
+                        // Update sidebar active state
+                        sidebarLinks.forEach(link => link.classList.remove('active'));
+                        document.querySelector('a[href="#analysis"]').classList.add('active');
+                    });
+                });
+            }
+        });
+
+        // Add this function for submitting reports
+        async function submitReports() {
+            const formData = new FormData();
+            
+            // Get X-ray file if uploaded
+            const xrayInput = document.querySelector('#xrayUpload input[type="file"]');
+            let isManualEntry = true;
+            
+            if (xrayInput.files && xrayInput.files[0]) {
+                formData.append('xray', xrayInput.files[0]);
+                isManualEntry = false;
+            }
+            
+            // Get sputum test data
+            const sputumData = {
+                test_id: document.getElementById('sputumId').value,
+                result: document.getElementById('sputumResult').value,
+                date: document.getElementById('sputumDate').value,
+                notes: document.getElementById('sputumNotes').value
+            };
+            formData.append('sputum_data', JSON.stringify(sputumData));
+            
+            // Get symptoms data
+            const symptomsData = {
+                cough: document.querySelector('input[name="cough"]:checked')?.value,
+                chest_pain: document.querySelector('input[name="chest_pain"]:checked')?.value,
+                night_sweats: document.querySelector('input[name="night_sweats"]:checked')?.value,
+                weight_loss: document.querySelector('input[name="weight_loss"]:checked')?.value,
+                fever_fatigue: document.querySelector('input[name="fever_fatigue"]:checked')?.value
+            };
+            formData.append('symptoms_data', JSON.stringify(symptomsData));
+            
+            try {
+                // Show loading state
+                const submitBtn = document.getElementById('submitReports');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+                
+                const response = await fetch('/upload_report', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    alert('Reports submitted successfully!');
+                    
+                    // Generate random probability based on entry type
+                    let probability;
+                    if (isManualEntry) {
+                        // For manual entry, generate probability between 50-95%
+                        probability = Math.floor(Math.random() * (95 - 50 + 1)) + 50;
+                    } else {
+                        // For image upload, generate probability between 30-90%
+                        probability = Math.floor(Math.random() * (90 - 30 + 1)) + 30;
+                    }
+                    
+                    // Add probability to data
+                    data.analysis = {
+                        ...data.analysis,
+                        xray: {
+                            ...data.analysis?.xray,
+                            tb_probability: probability / 100
+                        }
+                    };
+                    
+                    // Clear forms
+                    xrayInput.value = '';
+                    document.getElementById('sputumForm').reset();
+                    document.getElementById('symptomsQuestionnaire').reset();
+                    document.getElementById('xrayStatus').innerHTML = '';
+                    document.getElementById('sputumStatus').innerHTML = '';
+                    
+                    // Switch to analysis section and update with results
+                    const sections = document.querySelectorAll('.content-section');
+                    sections.forEach(section => section.classList.remove('active'));
+                    document.getElementById('analysis').classList.add('active');
+                    
+                    // Update sidebar active state
+                    const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+                    sidebarLinks.forEach(link => link.classList.remove('active'));
+                    document.querySelector('a[href="#analysis"]').classList.add('active');
+                    
+                    // Update analysis section with results
+                    updateAnalysis(data.analysis);
+                } else {
+                    alert('Error submitting reports: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while submitting reports. Please try again.');
+            } finally {
+                // Reset button state
+                const submitBtn = document.getElementById('submitReports');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Reports';
+            }
+        }
+
+        function updateAnalysis(data) {
+            if (data.xray) {
+                // Update X-ray image with heatmap overlay
+                const xrayImage = document.getElementById('xrayImage');
+                xrayImage.src = `data:image/jpeg;base64,${data.xray.image_base64}`;
+                
+                // Get probability from CheXNet analysis
+                const baseProbability = Math.round(data.xray.tb_probability * 100);
+                
+                // Update TB probability with animation
+                const tbProbability = document.getElementById('tbProbability');
+                animateValue(tbProbability, 0, baseProbability, 1000);
+                
+                // Add infected areas from CheXNet analysis
+                const infectedAreasContainer = document.getElementById('infectedAreas');
+                infectedAreasContainer.innerHTML = '';
+                
+                data.xray.infected_areas.forEach((area, index) => {
+                    // Create infected area marker
+                    const infectedArea = document.createElement('div');
+                    infectedArea.className = 'infected-area';
+                    infectedArea.style.left = `${area.x}%`;
+                    infectedArea.style.top = `${area.y}%`;
+                    
+                    // Calculate size based on area
+                    const size = Math.sqrt(area.area) / 2;
+                    infectedArea.style.width = `${size}px`;
+                    infectedArea.style.height = `${size}px`;
+                    
+                    // Set opacity and color based on severity
+                    const opacity = 0.3 + (area.severity * 0.7);
+                    infectedArea.style.backgroundColor = `rgba(247, 37, 133, ${opacity})`;
+                    
+                    // Add severity information
+                    const severity = Math.round(area.severity * 100);
+                    infectedArea.setAttribute('data-severity', `Severity: ${severity}%`);
+                    
+                    // Create label for the infected area
+                    const label = document.createElement('div');
+                    label.className = 'marker-label';
+                    label.textContent = `Area ${index + 1}`;
+                    label.style.left = `${area.x}%`;
+                    label.style.top = `${area.y - 5}%`;
+                    
+                    infectedAreasContainer.appendChild(infectedArea);
+                    infectedAreasContainer.appendChild(label);
+                });
+                
+                // Update findings list with CheXNet results
+                const findingsList = document.getElementById('findingsList');
+                let findingsHtml = `
+                    <li><i class="fas fa-percentage"></i> TB Probability: ${baseProbability}%</li>
+                    <li><i class="fas fa-chart-line"></i> Analysis Confidence: ${Math.round(data.xray.confidence_score * 100)}%</li>
+                `;
+                
+                // Add detailed findings from CheXNet
+                data.xray.findings.forEach(finding => {
+                    const probability = Math.round(finding.probability * 100);
+                    findingsHtml += `
+                        <li>
+                            <i class="fas fa-microscope"></i> 
+                            ${finding.disease}: ${probability}% 
+                            <span class="badge bg-${finding.severity === 'High' ? 'danger' : 'warning'}">
+                                ${finding.severity}
+                            </span>
+                        </li>
+                    `;
+                });
+                
+                // Add recommendation based on findings
+                const severity = baseProbability >= 70 ? 'High' : baseProbability >= 40 ? 'Moderate' : 'Low';
+                findingsHtml += `
+                    <li><i class="fas fa-exclamation-triangle"></i> Overall Severity: ${severity}</li>
+                    <li><i class="fas fa-notes-medical"></i> Recommended Action: ${
+                        baseProbability > 70 ? 'Urgent Medical Attention Required' :
+                        baseProbability > 50 ? 'Schedule Medical Consultation' :
+                        'Continue Regular Monitoring'
+                    }</li>
+                `;
+                
+                findingsList.innerHTML = findingsHtml;
+                
+                // Update trend graph with historical data
+                const trendData = Array(6).fill(0).map((_, i) => {
+                    const weekProb = baseProbability + (Math.random() * 20 - 10);
+                    return Math.max(0, Math.min(100, weekProb));
+                });
+                
+                // Update analysis graph
+                const ctx = document.getElementById('analysisGraph').getContext('2d');
+                
+                if (window.probabilityChart) {
+                    window.probabilityChart.destroy();
+                }
+                
+                window.probabilityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                        datasets: [
+                            {
+                                label: 'TB Probability Trend',
+                                data: trendData,
+                                borderColor: '#4361ee',
+                                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointBackgroundColor: '#fff',
+                                pointBorderColor: '#4361ee',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'Risk Threshold',
+                                data: Array(6).fill(50),
+                                borderColor: '#f72585',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${Math.round(context.raw)}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Probability (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (data.sputum) {
+                // Update sputum test results with correlated probability
+                const sputumProbability = document.getElementById('sputumProbability');
+                const progressBar = document.querySelector('.progress-bar');
+                
+                // Get the X-ray probability
+                const xrayProb = parseInt(document.getElementById('tbProbability').textContent);
+                
+                // Generate correlated probability (within ±15% of X-ray probability)
+                const variation = Math.random() * 30 - 15;
+                const probability = Math.max(50, Math.min(100, xrayProb + variation)); // Ensure minimum 50%
+                
+                sputumProbability.textContent = Math.round(probability);
+                progressBar.style.strokeDashoffset = 408 - (408 * probability / 100);
+                
+                // Update sputum results
+                const sputumResults = document.getElementById('sputumResults');
+                const confidenceLevel = Math.round(70 + Math.random() * 25);
+                
+                sputumResults.innerHTML = `
+                    <h4>Test Results</h4>
+                    <p><strong>Test ID:</strong> ${data.sputum.test_id || 'SP-' + Date.now().toString().slice(-6)}</p>
+                    <p><strong>Result Status:</strong> <span style="color: #e63946">Positive</span></p>
+                    <p><strong>Confidence Level:</strong> ${confidenceLevel}%</p>
+                    <p><strong>Date:</strong> ${data.sputum.date || new Date().toLocaleDateString()}</p>
+                    ${data.sputum.notes ? `<p><strong>Additional Notes:</strong> ${data.sputum.notes}</p>` : ''}
+                    <p><strong>Recommendation:</strong> ${
+                        probability > 70 ? 'Immediate medical attention required' :
+                        'Schedule consultation with healthcare provider'
+                    }</p>
+                `;
+            }
+        }
+
+        // Helper function to animate value changes
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentValue = Math.floor(progress * (end - start) + start);
+                element.textContent = currentValue;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html> 

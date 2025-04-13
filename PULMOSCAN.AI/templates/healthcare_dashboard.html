@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Dashboard - Pulmoscan.ai</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2b2d42;
+            --success-color: #4cc9f0;
+            --warning-color: #f77f00;
+            --danger-color: #e63946;
+            --gradient-1: linear-gradient(45deg, #4361ee, #3a0ca3);
+            --gradient-2: linear-gradient(45deg, #f72585, #b5179e);
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-bg);
+            color: var(--dark-bg);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0) 20%),
+                radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.05) 0%, rgba(231, 76, 60, 0) 20%);
+            background-attachment: fixed;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, #f72585);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px rgba(247, 37, 133, 0.7); }
+            100% { text-shadow: 0 0 20px rgba(247, 37, 133, 1); }
+        }
+
+        .sidebar-header p {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a.active {
+            background: linear-gradient(45deg, #f72585, #4361ee);
+            color: white;
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+        }
+
+        .sidebar-menu i {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            background-color: #f0f2f5;
+            margin-left: 280px;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            color: var(--dark-bg);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            width: 50px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .section-header:hover h2::after {
+            width: 100%;
+        }
+
+        /* Patient Records Grid */
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .patient-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .patient-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+        }
+
+        .status-pending {
+            background: var(--warning-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Report Content */
+        .report-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .xray-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .sputum-details, .symptoms-details {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        /* Action Buttons */
+        .report-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .patient-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation Classes */
+        .animate__animated {
+            animation-duration: 0.8s;
+        }
+
+        /* Camera Modal Styles */
+        .modal-content {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .camera-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius);
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scan-region {
+            width: 70%;
+            height: 200px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            position: relative;
+            animation: scanAnimation 2s infinite;
+        }
+
+        @keyframes scanAnimation {
+            0% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+            }
+        }
+
+        .scan-status {
+            margin-top: 15px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Analysis Loading */
+        .analysis-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border-radius: var(--border-radius);
+        }
+
+        .analysis-loading i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        /* Probability Meter */
+        .probability-meter {
+            height: 10px;
+            background: #f1f2f6;
+            border-radius: 5px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border-radius: 5px;
+            transition: width 1s ease-in-out;
+        }
+
+        .probability-text {
+            position: absolute;
+            right: 5px;
+            top: -18px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .analysis-result {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        .analysis-result h4 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .recommendation {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .xray-container {
+            position: relative;
+            width: 100%;
+            max-height: 500px;
+            background: #000;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .xray-container img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .infected-area {
+            position: absolute;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            background: rgba(231, 76, 60, 0.2);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        .modal-content {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .patient-info {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+        }
+
+        .report-details {
+            margin-top: 2rem;
+        }
+
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+        
+        .patient-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .patient-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .report-content {
+            margin-bottom: 1.5rem;
+        }
+        
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-pending {
+            background: #ffd700;
+            color: #000;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #000;
+        }
+
+        .status-badge.accepted {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification i {
+            font-size: 1.25rem;
+        }
+
+        .notification.success i {
+            color: #4CAF50;
+        }
+
+        .notification.error i {
+            color: #f44336;
+        }
+
+        /* Patient Cards */
+        .patient-card {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-buttons button {
+            transition: all 0.3s ease;
+        }
+
+        .action-buttons button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Counters */
+        .counter-badge {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* New styles for the patient card */
+        .patient-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .patient-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .status-badge.pending {
+            background-color: #ffd700;
+            color: #000;
+        }
+
+        .status-badge.accepted {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .probability {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Pulmoscan.ai</h3>
+                <p>Welcome, Dr. {{ healthcare.name }}</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#patient-records" class="active">
+                        <i class="fas fa-users"></i>
+                        Patient Records
+                    </a>
+                </li>
+                <li>
+                    <a href="#my-patients">
+                        <i class="fas fa-user-check"></i>
+                        My Patients
+                    </a>
+                </li>
+                <li>
+                    <a href="#cured-patients">
+                        <i class="fas fa-heart"></i>
+                        Cured Patients
+                    </a>
+                </li>
+                <li>
+                    <a href="/logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Patient Records Section -->
+            <div id="patient-records" class="content-section active">
+                <div class="section-header">
+                    <h2>Patient Records</h2>
+                    <p>Review and manage patient reports</p>
+                </div>
+                
+                <div class="patient-grid">
+                    {% for record in pending_reports %}
+                    <div class="patient-card" data-record-id="{{ record.id }}">
+                        <div class="patient-header">
+                            <h3 class="patient-name">{{ record.patient_name }}</h3>
+                            <span class="status-badge pending">pending</span>
+                        </div>
+                        
+                        <div class="report-content">
+                            <h4>X-Ray Image</h4>
+                            {% if record.data.xray_data %}
+                            <div class="xray-preview">
+                                <img src="{{ record.data.xray_data.image_path }}" alt="X-Ray" class="preview-image">
+                                <p class="probability">TB Probability: {{ "%.1f"|format(record.data.xray_data.tb_probability * 100) }}%</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="report-actions">
+                            <button class="btn btn-primary view-details" onclick="viewReport('{{ record.id }}')">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <button class="btn btn-success accept-btn" onclick="acceptReport('{{ record.id }}')">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                            <button class="btn btn-danger reject-btn" onclick="rejectReport('{{ record.id }}')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- My Patients Section -->
+            <div id="my-patients" class="content-section">
+                <div class="section-header">
+                    <h2>My Patients</h2>
+                    <p>Manage your accepted patients</p>
+                </div>
+                <div class="patient-grid">
+                    {% for patient in accepted_cases %}
+                    <div class="patient-card" data-record-id="{{ patient.id }}">
+                        <div class="patient-header">
+                            <h3 class="patient-name">{{ patient.patient_name }}</h3>
+                            <span class="status-badge accepted">
+                                <i class="fas fa-check-circle"></i> Active
+                            </span>
+                        </div>
+                        
+                        <div class="report-content">
+                            <h4>X-Ray Image</h4>
+                            {% if patient.data.xray_data %}
+                            <div class="xray-preview">
+                                <img src="{{ patient.data.xray_data.image_path }}" alt="X-Ray" class="preview-image">
+                                <p class="probability">TB Probability: {{ "%.1f"|format(patient.data.xray_data.tb_probability * 100) }}%</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="report-actions">
+                            <button class="btn btn-primary" onclick="viewPatientHistory('{{ patient.id }}')">
+                                <i class="fas fa-history"></i> View History
+                            </button>
+                            <button class="btn btn-success" onclick="markAsCured('{{ patient.id }}')">
+                                <i class="fas fa-check-circle"></i> Mark as Cured
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Cured Patients Section -->
+            <div id="cured-patients" class="content-section">
+                <div class="section-header">
+                    <h2>Cured Patients</h2>
+                </div>
+                <div class="patient-grid">
+                    {% for patient in cured_patients %}
+                    <div class="patient-card">
+                        <div class="patient-header">
+                            <h3 class="patient-name">{{ patient.patient_name }}</h3>
+                            <span class="status-cured">Cured</span>
+                        </div>
+                        <div class="patient-details">
+                            <p><i class="fas fa-calendar-check"></i> Cure Date: {{ patient.updated_at }}</p>
+                            <p><i class="fas fa-clock"></i> Treatment Duration: {{ patient.treatment_duration }}</p>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-primary" onclick="viewPatientHistory('{{ patient.id }}')">
+                                <i class="fas fa-history"></i> View History
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <div class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <!-- Report Card Template -->
+    <template id="reportCardTemplate">
+        <div class="patient-card">
+            <div class="card-header">
+                <h4 class="patient-name"></h4>
+                <span class="status-badge pending">
+                    <i class="fas fa-clock"></i>
+                    Pending
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="report-description"></p>
+                <div class="report-details">
+                    <span class="upload-date"></span>
+                    <span class="report-type"></span>
+                </div>
+                <div class="action-buttons">
+                    <button class="accept-btn" onclick="acceptReport(this)">
+                        <i class="fas fa-check"></i>
+                        Accept
+                    </button>
+                    <button class="reject-btn" onclick="rejectReport(this)">
+                        <i class="fas fa-times"></i>
+                        Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize sections visibility
+            const sections = document.querySelectorAll('.content-section');
+            const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+            
+            // Hide all sections except the first one
+            sections.forEach((section, index) => {
+                if (index !== 0) {
+                    section.style.display = 'none';
+                }
+            });
+            
+            // Add active class to first sidebar link
+            if (sidebarLinks.length > 0) {
+                sidebarLinks[0].classList.add('active');
+            }
+            
+            // Handle sidebar navigation
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        
+                        // Remove active class from all links
+                        sidebarLinks.forEach(l => l.classList.remove('active'));
+                        
+                        // Add active class to clicked link
+                        this.classList.add('active');
+                        
+                        // Hide all sections
+                        sections.forEach(section => {
+                            section.style.display = 'none';
+                        });
+                        
+                        // Show selected section
+                        const targetId = this.getAttribute('href').substring(1);
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            targetSection.style.display = 'block';
+                            targetSection.style.animation = 'fadeIn 0.3s forwards';
+                        }
+                    }
+                });
+            });
+            
+            // Patient Actions
+            window.acceptReport = function(reportId) {
+                if (!confirm('Are you sure you want to accept this patient?')) return;
+                
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.style.display = 'flex';
+                
+                fetch('/accept_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ report_id: reportId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const reportCard = document.querySelector(`[data-record-id="${reportId}"]`);
+                        if (reportCard) {
+                            reportCard.classList.add('fade-out');
+                            
+                            setTimeout(() => {
+                                // Get patient data
+                                const patientName = reportCard.querySelector('.patient-name').textContent;
+                                const xrayImage = reportCard.querySelector('.preview-image')?.src || '';
+                                const probability = reportCard.querySelector('.probability')?.textContent || '';
+                                
+                                // Create new card for My Patients
+                                const myPatientsGrid = document.querySelector('#my-patients .patient-grid');
+                                const newCard = document.createElement('div');
+                                newCard.className = 'patient-card fade-in';
+                                newCard.setAttribute('data-record-id', reportId);
+                                
+                                newCard.innerHTML = `
+                                    <div class="patient-header">
+                                        <h3 class="patient-name">${patientName}</h3>
+                                        <span class="status-badge accepted">
+                                            <i class="fas fa-check-circle"></i> Active
+                                        </span>
+                                    </div>
+                                    <div class="report-content">
+                                        <h4>X-Ray Image</h4>
+                                        <div class="xray-preview">
+                                            <img src="${xrayImage}" alt="X-Ray" class="preview-image">
+                                            <p class="probability">${probability}</p>
+                                        </div>
+                                    </div>
+                                    <div class="report-actions">
+                                        <button class="btn btn-primary" onclick="viewPatientHistory('${reportId}')">
+                                            <i class="fas fa-history"></i> View History
+                                        </button>
+                                        <button class="btn btn-success" onclick="markAsCured('${reportId}')">
+                                            <i class="fas fa-check-circle"></i> Mark as Cured
+                                        </button>
+                                    </div>
+                                `;
+                                
+                                // Remove from pending section and add to My Patients
+                                reportCard.remove();
+                                myPatientsGrid.appendChild(newCard);
+                                
+                                // Show success message
+                                showToast('Patient accepted successfully', 'success');
+                                
+                                // Switch to My Patients section
+                                const myPatientsLink = document.querySelector('a[href="#my-patients"]');
+                                if (myPatientsLink) {
+                                    myPatientsLink.click();
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        showToast(data.message || 'Error accepting patient', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Network error. Please try again.', 'error');
+                })
+                .finally(() => {
+                    loadingOverlay.style.display = 'none';
+                });
+            };
+            
+            window.rejectReport = function(reportId) {
+                if (!confirm('Are you sure you want to reject this patient?')) return;
+                
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.style.display = 'flex';
+                
+                fetch('/reject_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ report_id: reportId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const reportCard = document.querySelector(`[data-record-id="${reportId}"]`);
+                        if (reportCard) {
+                            reportCard.classList.add('fade-out');
+                            setTimeout(() => {
+                                reportCard.remove();
+                                showToast('Patient rejected successfully', 'success');
+                            }, 300);
+                        }
+                    } else {
+                        showToast(data.message || 'Error rejecting patient', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Network error. Please try again.', 'error');
+                })
+                .finally(() => {
+                    loadingOverlay.style.display = 'none';
+                });
+            };
+            
+            // Add CSS for animations
+            const style = document.createElement('style');
+            style.textContent = `
+                .fade-out {
+                    animation: fadeOut 0.3s forwards;
+                }
+                
+                .fade-in {
+                    animation: fadeIn 0.3s forwards;
+                }
+                
+                @keyframes fadeOut {
+                    from { opacity: 1; transform: translateY(0); }
+                    to { opacity: 0; transform: translateY(-20px); }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                .content-section {
+                    transition: all 0.3s ease;
+                }
+                
+                .sidebar-menu a {
+                    transition: all 0.3s ease;
+                }
+                
+                .sidebar-menu a.active {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-left: 4px solid #fff;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
+</html>
